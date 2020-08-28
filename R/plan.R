@@ -8,6 +8,7 @@ the_plan <-
       fixing_countries_names(long_data),
     
     data_filtered = filtering_data(data_country,
-                           path_map = file_in("auxi/map.xlsx"))
+                           path_map = file_in("auxi/map.xlsx"),
+                           output = file_out("auxi/data_filtered.xlsx"))
 
     )
