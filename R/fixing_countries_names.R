@@ -24,7 +24,7 @@ fixing_countries_names <- function(data,
   write_csv(data3, bad_names)
   # checking good names respect codes
   data4 <- data2 %>% 
-    filter((!is.na(code))) %>% 
+    filter((!is.na(country_code))) %>% 
     select(-code)
   return(data4)
 }
