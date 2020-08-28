@@ -5,6 +5,9 @@ the_plan <-
       clean_data(path = 
                    file_in("data/dataset_indicadores_28082020.xlsx")),
     data_country = 
-      fixing_countries_names(long_data)
+      fixing_countries_names(long_data),
+    
+    data_filtered = filtering_data(data_country,
+                           path_map = file_in("auxi/map.xlsx"))
 
     )
