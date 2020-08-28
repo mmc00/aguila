@@ -6,4 +6,3 @@ the_plan <-
                    file_in("data/dataset_indicadores_28082020.xlsx"))
 
     )
-)
