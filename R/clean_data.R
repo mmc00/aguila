@@ -119,7 +119,9 @@ clean_data <- function(path = "data/dataset_indicadores_28082020.xlsx",
                      values_to = "values") %>% 
         select(all_of(c("country", "variable",
                         "year", "values"))) %>% 
-        mutate(grouping_var = data_name)
+        mutate(grouping_var = data_name) %>% 
+        mutate(year = substr(year, 1, 4)) %>% 
+
     }
     # vars in cols
     if (any(data_name %in% var_in_cols_type_sheet)){
