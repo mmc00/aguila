@@ -55,4 +55,24 @@
 #fixing_countries_names(data)
 # loadd(long_data)
 # data = long_data
- 
+
+# data with good name country
+# loadd(data_country)
+# vars <- data_country %>%
+#   group_by(variable, grouping_var) %>%
+#   tally()
+# 
+#  maping vars
+# data3 <- data_country %>% 
+#   mutate(region = countrycode(country_code, 
+#                               origin = "iso3c",
+#                               destination = "region")) %>% 
+#   filter(region == "Latin America & Caribbean") %>% 
+#   select(country_code, region) %>% 
+#   distinct(., .keep_all = T)
+# write_csv(data3, "auxi/latam.csv")
+         
+
+# country_dic <- data_country %>%
+#   select(country, country_code) %>%
+#   distinct(., .keep_all = T)
