@@ -17,7 +17,8 @@ filtering_data <- function(dat,
     left_join(map_countries, by = "country_code") %>% 
     left_join(drop_vars, by = c("variable",	"grouping_var")) %>% 
     filter(!is.na(region)) %>% 
-    filter(is.na(drop))
+    filter(is.na(drop)) %>% 
+    select(-drop)
   
   return(data)
 }
