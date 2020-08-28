@@ -95,7 +95,7 @@ clean_data <- function(path = "data/dataset_indicadores_19082020.xlsx",
       # rename col variable
       if(!is_empty(col_replace_name)){
       data <- data %>%
-        rename_with(~ paste0("varible"), all_of(col_replace_name))
+        rename_with(~ paste0("variable"), all_of(col_replace_name))
       } else{
       data <- data %>% 
         mutate(variable = data_name)
@@ -141,7 +141,7 @@ clean_data <- function(path = "data/dataset_indicadores_19082020.xlsx",
   return(data)
   }
   #
-  data_list3 <- 1:length(data_list2) %>% 
+  data_list3 <- 1:3 %>% 
     map(~reshape_data(data = data_list2[[.x]], 
                       data_name = names(data_list2[.x])))
   return(data_list3)
