@@ -71,8 +71,20 @@
 #   select(country_code, region) %>% 
 #   distinct(., .keep_all = T)
 # write_csv(data3, "auxi/latam.csv")
-         
-
-# country_dic <- data_country %>%
-#   select(country, country_code) %>%
-#   distinct(., .keep_all = T)
+#          
+# 
+# # country_dic <- data_country %>%
+# #   select(country, country_code) %>%
+# #   distinct(., .keep_all = T)
+# loadd(data_filtered)
+# data_sum <- data_filtered %>% 
+#   group_by(variable, grouping_var) %>% 
+#   tally()
+# 
+# # data_year <- data_filtered %>% 
+# #   group_by(variable, grouping_var, country_code) %>% 
+# #   summarise(max_year = max(year),
+# #             min_year = min(year), .groups = "drop") %>% 
+# #   mutate(years = paste0(min_year, "_", max_year)) %>% 
+# #   select(variable, grouping_var, country_code, years) %>% 
+# #   pivot_wider(names_from = country_code, values_from = years)
