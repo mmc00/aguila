@@ -7,7 +7,7 @@
 ##' @param two_headers sheets with double col
 ##' @param countries_names_var list of countries var name in sheets
 ##' @param data_cols_years sheets with year as col
-clean_data <- function(path = "data/dataset_indicadores_19082020.xlsx",
+clean_data <- function(path = "data/dataset_indicadores_28082020.xlsx",
                        countries_names_var = c(
                           "Country", "Region/economy",
                           "Reporter Name", "Country Name",
@@ -19,12 +19,14 @@ clean_data <- function(path = "data/dataset_indicadores_19082020.xlsx",
                           "Human Development Index (HDI)",
                           "Inflows FDI",
                           "WITS 2018",
+                          "WITS completo 2017",
                           "WB", "Telecomm"
                         ),
                        control_id_var = c(
                          "Indicator",
                          "Series Code",
-                         "Indicador"
+                         "Indicador",
+                         "Indicator Name"
                          ),
                        two_headers = c(
                           "VoiceandAccountability",
@@ -141,9 +143,21 @@ clean_data <- function(path = "data/dataset_indicadores_19082020.xlsx",
   return(data)
   }
   #
-  data_list3 <- 1:length(data_list2) %>% 
+  data <- 1:length(data_list2) %>% 
     map(~reshape_data(data = data_list2[[.x]], 
                       data_name = names(data_list2[.x])))
-  return(data_list3)
+    
+  # same format cols for each data.frame function
+  same_cols_format <- function(dat){
+    dat2 <- dat %>% 
+      mutate_at(vars(-values), as.character) %>% 
+      mutate(values = as.numeric(values))
+  }
+  data <- data %>% 
+          map(same_cols_format) %>% 
+          set_names(sheets_on_data) %>% 
+          bind_rows
+  
+  return(data)
 }
 
