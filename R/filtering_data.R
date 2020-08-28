@@ -7,7 +7,8 @@
 filtering_data <- function(dat,
                            path_map = "auxi/map.xlsx",
                            map_countries_sheet = "region",
-                           drop_vars_map_sheet = "varsdrop") {
+                           drop_vars_map_sheet = "varsdrop",
+                           output) {
   
   # read maps
   map_countries <- read.xlsx(path_map, sheet = map_countries_sheet)
@@ -19,6 +20,20 @@ filtering_data <- function(dat,
     filter(!is.na(region)) %>% 
     filter(is.na(drop)) %>% 
     select(-drop)
+  # summary data
+  data_year_sum <- data %>% 
+  group_by(variable, grouping_var, country_code) %>% 
+  summarise(max_year = max(year),
+            min_year = min(year), .groups = "drop") %>% 
+  mutate(years = paste0(min_year, "_", max_year)) %>% 
+  select(variable, grouping_var, country_code, years) %>% 
+  pivot_wider(names_from = country_code, values_from = years)
   
+  wb <- createWorkbook()
+  addWorksheet(wb, "data")
+  addWorksheet(wb, "summary")
+  writeData(wb, "data", data)
+  writeData(wb, "summary", data_year_sum )
+  saveWorkbook(wb, file = output, overwrite = T)
   return(data)
 }
