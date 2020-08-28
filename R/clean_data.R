@@ -49,7 +49,7 @@ clean_data <- function(path = "data/dataset_indicadores_19082020.xlsx",
   data_list <- list()
   # read sheets
   data_list <- sheets_on_data %>%
-    map(~ read_excel(path, .x)) %>%
+    map(~read_excel(path, .x)) %>%
     set_names(sheets_on_data)
   # rename cols
   rename_country <- function(data, cnv){
@@ -57,7 +57,7 @@ clean_data <- function(path = "data/dataset_indicadores_19082020.xlsx",
     data <- data %>% 
       rename_with(~paste0("country"), all_of(col_replace_name))
   }
-  data_list <- data_list %>%
+  data_list2 <- data_list %>%
     map(rename_country, cnv = countries_names_var) %>%
     set_names(sheets_on_data)
   # reshaping data
@@ -140,7 +140,10 @@ clean_data <- function(path = "data/dataset_indicadores_19082020.xlsx",
     }
   return(data)
   }
-  data_list <- 1:length(data_list) %>% 
-    map(~reshape_data(data_list[[.x]], names(data_list[[.x]])))
-  return(data_list)
+  #
+  data_list3 <- 1:length(data_list2) %>% 
+    map(~reshape_data(data = data_list2[[.x]], 
+                      data_name = names(data_list2[.x])))
+  return(data_list3)
 }
+
