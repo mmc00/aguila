@@ -8,14 +8,14 @@
 ##' @param countries_names_var list of countries var name in sheets
 ##' @param data_cols_years sheets with year as col
 clean_data <- function(path = "data/dataset_indicadores_19082020.xlsx",
-                       countries_names_var <- c(
+                       countries_names_var = c(
                           "Country", "Region/economy",
                           "Reporter Name", "Country Name",
                           "Country/Territory", "País",
-                          "Country"
+                          "Country", "...2"
                         ),
                        code_names = c("Code", "CODE"),
-                       data_cols_years <- c(
+                       data_cols_years = c(
                           "Human Development Index (HDI)",
                           "Inflows FDI",
                           "WITS 2018",
@@ -26,13 +26,24 @@ clean_data <- function(path = "data/dataset_indicadores_19082020.xlsx",
                          "Series Code",
                          "Indicador"
                          ),
-                       two_header <- c(
+                       two_headers = c(
                           "VoiceandAccountability",
                           "RegulatoryQuality",
                           "ControlofCorruption",
                           "GovernmentEffectiveness",
                           "RuleofLaw"
-                        )
+                        ),
+                       var_in_cols_type_sheet = c(
+                         "DB", "FTA CR"
+                       ),
+                       var_to_remove_in_cols = c(
+                         "Country code", "Region",
+                         "Income group"
+                       ),
+                       var_year = c(
+                         "DB Year",
+                         "Year of entry into force"
+                       )
                        ) {
   sheets_on_data <- excel_sheets(path)
   data_list <- list()
@@ -53,7 +64,7 @@ clean_data <- function(path = "data/dataset_indicadores_19082020.xlsx",
   reshape_data <- function(data, data_name){
     data <- data %>% select(country, everything(.))
     # two headers
-    if (data_name %in% two_headers){
+    if (any(data_name %in% two_headers)){
       # fixing code name and order data.frame
       col_replace_name <- colnames(data)[which(colnames(data) %in% code_names)]
       data <- data %>%
@@ -77,7 +88,7 @@ clean_data <- function(path = "data/dataset_indicadores_19082020.xlsx",
         mutate(grouping_var = data_name)
     }
     # year in cols
-    if (data_name %in% data_cols_years){
+    if (any(data_name %in% data_cols_years)){
       # cols to replace
       col_replace_name <- colnames(data)[which(colnames(data) %in% 
                                                  control_id_var)]
@@ -106,6 +117,30 @@ clean_data <- function(path = "data/dataset_indicadores_19082020.xlsx",
                         "year", "values"))) %>% 
         mutate(grouping_var = data_name)
     }
-  
+    # vars in cols
+    if (any(data_name %in% var_in_cols_type_sheet)){
+      # vars ro remove
+      vars_to_remove <- which(colnames(data) %in% var_to_remove_in_cols)
+      vars_to_remove <- colnames(data)[vars_to_remove]
+      data <- data %>% 
+        select(-all_of(vars_to_remove))
+      # change year name
+      col_years <- colnames(data)[which(colnames(data) %in% 
+                                                 var_year)]
+      data <- data %>%
+        rename_with(~ paste0("year"), all_of(col_years))
+      # replace 
+      data <- data %>%
+        mutate_at(vars(-country, -year), as.numeric) %>% 
+        pivot_longer(cols = -c(country, year),
+                     names_to = "variable",
+                     values_to = "values") %>% 
+        mutate(grouping_var = data_name)
+      
+    }
+  return(data)
   }
+  data_list <- 1:length(data_list) %>% 
+    map(~reshape_data(data_list[[.x]], names(data_list[[.x]])))
+  return(data_list)
 }
