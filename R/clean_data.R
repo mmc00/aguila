@@ -12,7 +12,8 @@ clean_data <- function(path = "data/dataset_indicadores_28082020.xlsx",
                           "Country", "Region/economy",
                           "Reporter Name", "Country Name",
                           "Country/Territory", "País",
-                          "Country", "...2"
+                          "Country", "...2",
+                          "Country / Region"
                         ),
                        code_names = c("Code", "CODE"),
                        data_cols_years = c(
@@ -20,7 +21,8 @@ clean_data <- function(path = "data/dataset_indicadores_28082020.xlsx",
                           "Inflows FDI",
                           "WITS 2018",
                           "WITS completo 2017",
-                          "WB", "Telecomm"
+                          "WB", "Telecomm",
+                          "TiVA", "RTA"
                         ),
                        control_id_var = c(
                          "Indicator",
