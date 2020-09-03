@@ -11,8 +11,8 @@ filtering_data <- function(dat,
                            output) {
   
   # read maps
-  map_countries <- read.xlsx(path_map, sheet = map_countries_sheet)
-  drop_vars <- read.xlsx(path_map, sheet = drop_vars_map_sheet)
+  map_countries <- read_xlsx(path_map, sheet = map_countries_sheet)
+  drop_vars <- read_xlsx(path_map, sheet = drop_vars_map_sheet)
   # filtering
   data <- dat %>% 
     left_join(map_countries, by = "country_code") %>% 
