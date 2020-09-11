@@ -1,23 +1,36 @@
 # loadd(data2fil)
 
-data <- read_xlsx("data_filtered.xlsx")
-head(data)
-data <- data[, c(1, 2, 3, 4)]
+# data <- read_xlsx("data_filtered.xlsx")
+# head(data)
+# data <- data[, c(1, 2, 3, 4)]
+# 
+# #### Kim
+# 
+# data_cross <- data %>%
+#   filter(year == "2016") %>%
+#   pivot_wider(id_cols = country, names_from = variable, values_from = values)
+# 
+# data_cross$country <- as.factor(data_cross$country)
+# 
+# data_cross$count_na <- as.vector(rowSums(is.na(data_cross))) #contar los NA
+# 
+# data2fil <- data_cross
 
-####
-
-data_cross <- data %>%
-  filter(year == "2016") %>%
-  pivot_wider(id_cols = country, names_from = variable, values_from = values)
-
-data_cross$country <- as.factor(data_cross$country)
-
-data_cross$NAsum <- as.vector(rowSums(is.na(data_cross))) #contar los NA
-
-data2fil <- data_cross
+# #### 
 
 # filtrar datos
 data <- data2fil %>%
+  # filtrar paises arbitrariamente
+  filter(!(country %in% c(
+#    "Antigua and Barbuda",
+    "Barbados",
+    "Belize",
+    "Jamaica",
+#    "St. Lucia",
+#    "St. Kitts and Nevis",
+#    "St. Vincent and the Grenadines",
+    "Venezuela"
+  ))) %>% 
   column_to_rownames(var = "country") %>% 
   filter(count_na < 20) %>%
   select(-count_na) %>% 
@@ -29,6 +42,8 @@ data <- data2fil %>%
   # eliminadas por mi
   select(-all_of("Exports of goods and services (annual % growth)")) %>% 
   select(-all_of("Net barter terms of trade index (2000 = 100)"))
+  
+
   
 
 # Imputar datos:
@@ -72,6 +87,5 @@ cortest.bartlett(imputed_data)
 fit <- factanal(imputed_data, 4, rotation = "none")  
 fit
 
-fit$loadings
-
-cargas<-fit$loadings
+broom::tidy(fit) %>%
+  View()
