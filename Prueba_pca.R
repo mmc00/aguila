@@ -12,6 +12,8 @@ data_cross <- data %>%
 
 data_cross$country <- as.factor(data_cross$country)
 
+data_cross$NAsum <- as.vector(rowSums(is.na(data_cross))) #contar los NA
+
 data2fil <- data_cross
 
 # filtrar datos
