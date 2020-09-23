@@ -8,11 +8,16 @@ filtering_data2 <- function(dat,
                            path_map = "auxi/map2.xlsx",
                            drop_vars_map_sheet = "varsdrop",
                            country_var_sheet = "country_var",
+                           growth_vars_sheet = "growth_vars",
                            select_year = 2017,
                            output) {
   # read maps
   drop_vars <- read_xlsx(path_map, sheet = drop_vars_map_sheet)
   country_var <- read_xlsx(path_map, sheet = country_var_sheet)
+  growth_vars <- read_xlsx(path_map, sheet = growth_vars_sheet) %>%
+    select(1) %>%
+    unlist() %>%
+    unname()
   # filtering
   data <- dat %>% 
     left_join(drop_vars, by = c("variable",	"grouping_var")) %>% 
@@ -27,6 +32,20 @@ filtering_data2 <- function(dat,
       variable == "Estimate" ~ grouping_var,
       TRUE ~ variable
     ))
+  # adding growth rate vars
+  data2 <- data %>%
+    arrange(country, variable, year) %>%
+    group_by(country, variable) %>%
+    mutate(values_growth = values / lag(values) - 1) %>%
+    ungroup() %>%
+    filter(!is.na(values_growth)) %>%
+    select(-values) %>%
+    rename(values = values_growth) %>%
+    filter(variable %in% growth_vars) %>% 
+    mutate(variable = paste0("growth_", variable))
+  # join vars
+  data <- data2 %>% 
+          bind_rows(data)
   # summary data
   data_year_sum <- data %>% 
   group_by(variable, grouping_var, country_code) %>%
