@@ -4,6 +4,8 @@ loadd(data2fil)
 library(missMDA)
 library(corrplot)
 library(psych) # KMO
+library(factoextra)
+library(FactoMineR)
 # #### Kim
 
 # data <- read_xlsx("data_filtered.xlsx")
@@ -26,28 +28,36 @@ library(psych) # KMO
 data <- data2fil %>%
   # filtrar paises arbitrariamente
   filter(!(country %in% c(
-#    "Antigua and Barbuda",
+    "Antigua and Barbuda",
+    "Aruba",
     "Barbados",
     "Belize",
     "Dominica",
+    "Suriname",
+    "Guyana",
 #    "Jamaica",
-#    "St. Lucia",
+    "St. Lucia",
     "St. Kitts and Nevis",
-#    "St. Vincent and the Grenadines",
+    "St. Vincent and the Grenadines",
     "Venezuela"
   ))) %>% 
   column_to_rownames(var = "country") %>% 
   filter(count_na < 20) %>%
   select(-count_na) %>% 
   select(-all_of("Score-Trading across borders (DB06-15 methodology)")) %>% 
+  # select(-all_of("Score-Trading across borders (DB16-19 methodology)")) %>% 
   select(-all_of("Mobile-cellular telephone subscriptions")) %>% 
   select(-all_of("Percentage of Individuals using the Internet")) %>%
   select(-all_of("Fixed-broadband subscriptions")) %>% 
   select(-all_of("Human Development Index (HDI)")) %>% 
+  select(-starts_with("DEXF")) %>% 
+  select(-starts_with("FEXD")) %>% 
+  select(-all_of("MFN Weighted Average (%)")) %>% 
+  select(-all_of("AHS Weighted Average (%)")) %>% 
   # eliminadas por mi
   select(-all_of("Exports of goods and services (annual % growth)")) %>% 
   select(-all_of("Net barter terms of trade index (2000 = 100)")) %>% 
-#  select(-all_of("Inflows FDI")) # %>%
+  # select(-all_of("Inflows FDI")) # %>%
   select(-all_of("growth_Inflows FDI"))
 
 # transformation
@@ -55,23 +65,23 @@ library(countrycode)
 library(wpp2019)
 
 data("pop")
-pop <- pop %>% 
-  select(-name) %>% 
-  pivot_longer(cols = -country_code, 
+pop <- pop %>%
+  select(-name) %>%
+  pivot_longer(cols = -country_code,
                names_to = "year",
-               values_to = "values") %>% 
-  filter(year == 2015) %>% 
-  select(-year) # %>% 
+               values_to = "values") %>%
+  filter(year == 2015) %>%
+  select(-year) # %>%
   # mutate(country_code = as.character(country_code))
 
-data2 <- data %>% 
-  rownames_to_column("country") %>% 
-  mutate(country_code = countryname(country, "iso3n" )) %>% 
-  left_join(pop, by = "country_code") %>% 
-  mutate(inflows_fdi_per = `Inflows FDI`/ values) %>% 
-  select(-`Inflows FDI`) %>% 
-  select(-values) %>% 
-  column_to_rownames("country") %>% 
+data2 <- data %>%
+  rownames_to_column("country") %>%
+  mutate(country_code = countryname(country, "iso3n" )) %>%
+  left_join(pop, by = "country_code") %>%
+  mutate(inflows_fdi_per = `Inflows FDI`/ values) %>%
+  select(-`Inflows FDI`) %>%
+  select(-values) %>%
+  column_to_rownames("country") %>%
   select(-country_code)
 
 # change data 
@@ -114,13 +124,23 @@ cortest.bartlett(imputed_data)
 # Significativo.
 
 # Análisis de Factores
-fit <- factanal(imputed_data, 4, rotation = "none",
-                scores = "regression")  
+fit <- factanal(imputed_data, 4, rotation = "none")
 fit
+fit1 <- broom::tidy(fit) %>%
+  mutate_at(.vars = c("fl1", "fl2", "fl3", "fl4"), .funs = ~round(., 2))
+View(fit1)
+
+res_pca <- PCA(imputed_data, scale.unit = TRUE, ncp = 4, graph = F,
+               )
+
+fit2 <- res_pca$var$cor
+View(fit2)
+
+
+pca_res <- res_pca$var$cor
+broom::tidy(pca_res) %>% View()
+
 remove(data)
 remove(imputed_data)
 remove(nb) 
 remove(data2fil)
-
-broom::tidy(fit) %>%
-  View()
