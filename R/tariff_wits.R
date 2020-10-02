@@ -6,7 +6,21 @@ tariff_wits <- function(path = "data/DataJobID-2059520_2059520_aguila2.csv",
                       select_year = 2016) {
 
 # wits data
-wits_tariff <- read_csv(path) %>%
+wits_tariff <- read_csv(path,
+  col_types = cols(
+    .default = col_double(),
+    `Selected Nomen` = col_character(),
+    `Native Nomen` = col_character(),
+    Reporter = col_character(),
+    `Reporter Name` = col_character(),
+    Product = col_character(),
+    `Product Name` = col_character(),
+    Partner = col_character(),
+    `Partner Name` = col_character(),
+    `Trade Source` = col_character(),
+    DutyType = col_character()
+  )
+) %>%
   select(
     `Reporter Name`, `Simple Average`, `Weighted Average`,
     `Tariff Year`, DutyType
@@ -37,7 +51,7 @@ years <- data.frame(
     values_from = values
   ) %>% 
   mutate(id = row_number()) %>% 
-  full_join(data.frame(id = 1:nrow(countries))) %>% 
+  full_join(data.frame(id = 1:nrow(countries)), by = "id") %>% 
   select(-id) %>% 
   mutate_all(replace_na, replace = 0)
 
@@ -54,7 +68,7 @@ data_tariff <- years %>%
     names_to = "year"
   ) %>%
   mutate(id = row_number()) %>%
-  full_join(types) %>%
+  full_join(types, by = "id") %>%
   mutate(type = if_else(is.na(type), "other", type)) %>%
   pivot_wider(names_from = type, values_from = id) %>%
   select(-other) %>%
