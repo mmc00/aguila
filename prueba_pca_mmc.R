@@ -1,5 +1,7 @@
 loadd(data2fil)
 loadd(tariff)
+loadd(fdi)
+loadd(data_merge)
 # packages
 library(missMDA)
 library(corrplot)
@@ -58,7 +60,8 @@ data <- data2fil %>%
     "Japan Tokyo",
     "Puerto Rico (U.S.)",
     "Trinidad and Tobago",
-    "Luxembourg"
+    "Luxembourg",
+    "Bolivia"
   ))) %>% 
   filter(count_na < 20) %>%
   select(-count_na) %>% 
@@ -85,31 +88,45 @@ data <- data2fil %>%
 data_mfn <- data %>%
   mutate(country_code = countryname(country, "iso3c")) %>%
   left_join(tariff, by = "country_code") %>%
-  column_to_rownames(var = "country") %>%
   select(-all_of("MFN Weighted Average (%)")) %>%
   select(-all_of("AHS Weighted Average (%)")) %>%
   select(-all_of("Trade tariffs, % duty*")) %>%
   select(-all_of("AHS_simple")) %>%
   select(-all_of("AHS_weighted")) %>%
-  select(-all_of("BND_simple")) %>%
-  # select(-all_of("BND_weighted")) %>%
-  select(-all_of("MFN_simple")) %>%
-  # select(-all_of("MFN_weighted")) %>%
-  select(-country_code)
+  # select(-all_of("BND_simple")) %>%
+  select(-all_of("BND_weighted")) %>%
+  # select(-all_of("MFN_simple")) # %>%
+  select(-all_of("MFN_weighted")) # %>%
+  
 data <- data_mfn
 
-# transformation
-library(countrycode)
-library(wpp2019)
+# joining fdi data 
+data_fdi <- data %>% 
+  left_join(fdi, by = "country_code") %>% 
+  column_to_rownames(var = "country") %>%
+  select(-country_code) %>% 
+  select(-`Inflows FDI`) %>% 
+  select(-economy_label) %>% 
+  select(-fdi_cp_million) %>%
+  select(-fdi_cp_pc) %>%
+  select(-fdi_perc) %>%
+  select(-fdi_perc_gdp) #%>%
+  # select(-fdi_perc_fcf)
 
-data("pop")
-pop <- pop %>%
-  select(-name) %>%
-  pivot_longer(cols = -country_code,
-               names_to = "year",
-               values_to = "values") %>%
-  filter(year == 2015) %>%
-  select(-year) # %>%
+# fixing ICT imports for CRI
+imputed_data <- data_fdi 
+# transformation
+# library(countrycode)
+# library(wpp2019)
+# 
+# data("pop")
+# pop <- pop %>%
+#   select(-name) %>%
+#   pivot_longer(cols = -country_code,
+#                names_to = "year",
+#                values_to = "values") %>%
+#   filter(year == 2015) %>%
+#   select(-year) # %>%
   # mutate(country_code = as.character(country_code))
 
 # data2 <- data %>%
@@ -126,19 +143,19 @@ pop <- pop %>%
 # data <- data2
 # Imputar datos:
 # Estimar número de de dimensiones
-nb <- estim_ncpPCA(data, ncp.min = 0,
-                   ncp.max = 5,
-                   method.cv = "Kfold",
-                   nbsim = 50)
-
-imputed_data <- data %>% 
-  imputePCA(ncp = nb$ncp) %>% 
-  pluck("completeObs") %>% 
-  as.data.frame()
-
-# En caso de eliminiar todos los que tengan NA
-imputed_data2 <- data %>%
-  drop_na
+# nb <- estim_ncpPCA(data, ncp.min = 0,
+#                    ncp.max = 5,
+#                    method.cv = "Kfold",
+#                    nbsim = 50)
+# 
+# imputed_data <- data %>%
+#   imputePCA(ncp = nb$ncp) %>%
+#   pluck("completeObs") %>%
+#   as.data.frame()
+# 
+# # En caso de eliminiar todos los que tengan NA
+# imputed_data2 <- data %>%
+#   drop_na
 
 ##### Eligir cuales datos usar
 # imputed_data <- imputed_data2
