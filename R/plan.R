@@ -32,5 +32,16 @@ the_plan <-
       "data/DataJobID-2059520_2059520_aguila2.csv"
     ),
     select_year = year
+    ), dynamic = map(year)),
+    
+    # fdi UNCTAD complete 
+    fdi = target(fdi_unctad(path = file_in(
+      !!paste0(
+      "data/",
+      "US_FdiFlowsStock",
+      "_ST202007161100_v1.csv"
+      )
+    ),
+    select_year = year
     ), dynamic = map(year))
 )
