@@ -1,5 +1,5 @@
 loadd(data2fil)
-
+loadd(tariff)
 # packages
 library(missMDA)
 library(corrplot)
@@ -39,9 +39,27 @@ data <- data2fil %>%
     "St. Lucia",
     "St. Kitts and Nevis",
     "St. Vincent and the Grenadines",
-    "Venezuela"
+    "Venezuela",
+    "Anguila",
+    "Turks and Caicos Isl.",
+    "Puerto Rico",
+    "Korea, Dem. Rep.",
+    "Venezuela, RB",
+    "Virgin Islands (U.S.)",
+    "Curacao",
+    "Dominican Rep.",
+    "Falkland (Malvinas) Is.",
+    "Korea (Rep. of)",
+    "Turks & Caicos Is.",
+    "Virgin Islands (US)",
+    "Brazil Rio de Janeiro",
+    "Brazil São Paulo",
+    "Japan Osaka",
+    "Japan Tokyo",
+    "Puerto Rico (U.S.)",
+    "Trinidad and Tobago",
+    "Luxembourg"
   ))) %>% 
-  column_to_rownames(var = "country") %>% 
   filter(count_na < 20) %>%
   select(-count_na) %>% 
   select(-all_of("Score-Trading across borders (DB06-15 methodology)")) %>% 
@@ -52,13 +70,33 @@ data <- data2fil %>%
   select(-all_of("Human Development Index (HDI)")) %>% 
   select(-starts_with("DEXF")) %>% 
   select(-starts_with("FEXD")) %>% 
-  select(-all_of("MFN Weighted Average (%)")) %>% 
-  select(-all_of("AHS Weighted Average (%)")) %>% 
+  select(-starts_with("Trade (% of GDP)")) %>% 
+  # select(-all_of("MFN Weighted Average (%)")) %>%
+  # select(-all_of("AHS Weighted Average (%)")) %>%
   # eliminadas por mi
   select(-all_of("Exports of goods and services (annual % growth)")) %>% 
   select(-all_of("Net barter terms of trade index (2000 = 100)")) %>% 
   # select(-all_of("Inflows FDI")) # %>%
-  select(-all_of("growth_Inflows FDI"))
+  select(-all_of("growth_Inflows FDI")) 
+# %>% 
+#   column_to_rownames(var = "country")
+
+# MFN ajuste
+data_mfn <- data %>%
+  mutate(country_code = countryname(country, "iso3c")) %>%
+  left_join(tariff, by = "country_code") %>%
+  column_to_rownames(var = "country") %>%
+  select(-all_of("MFN Weighted Average (%)")) %>%
+  select(-all_of("AHS Weighted Average (%)")) %>%
+  select(-all_of("Trade tariffs, % duty*")) %>%
+  select(-all_of("AHS_simple")) %>%
+  select(-all_of("AHS_weighted")) %>%
+  select(-all_of("BND_simple")) %>%
+  # select(-all_of("BND_weighted")) %>%
+  select(-all_of("MFN_simple")) %>%
+  # select(-all_of("MFN_weighted")) %>%
+  select(-country_code)
+data <- data_mfn
 
 # transformation
 library(countrycode)
@@ -74,18 +112,18 @@ pop <- pop %>%
   select(-year) # %>%
   # mutate(country_code = as.character(country_code))
 
-data2 <- data %>%
-  rownames_to_column("country") %>%
-  mutate(country_code = countryname(country, "iso3n" )) %>%
-  left_join(pop, by = "country_code") %>%
-  mutate(inflows_fdi_per = `Inflows FDI`/ values) %>%
-  select(-`Inflows FDI`) %>%
-  select(-values) %>%
-  column_to_rownames("country") %>%
-  select(-country_code)
+# data2 <- data %>%
+#   rownames_to_column("country") %>%
+#   mutate(country_code = countryname(country, "iso3n" )) %>%
+#   left_join(pop, by = "country_code") %>%
+#   mutate(inflows_fdi_per = `Inflows FDI`/ values) %>%
+#   select(-`Inflows FDI`) %>%
+#   select(-values) %>%
+#   column_to_rownames("country") %>%
+#   select(-country_code)
 
 # change data 
-data <- data2
+# data <- data2
 # Imputar datos:
 # Estimar número de de dimensiones
 nb <- estim_ncpPCA(data, ncp.min = 0,
@@ -144,3 +182,36 @@ remove(data)
 remove(imputed_data)
 remove(nb) 
 remove(data2fil)
+
+# plot --------------------------------------------------------------------
+library(plotly)
+plot_data <- factanal(imputed_data, 3, rotation = "none") %>%
+  broom::tidy() %>%
+  select(-uniqueness) %>%
+  mutate_at(.vars = c("fl1", "fl2", "fl3"), .funs = ~ round(., 2)) %>% 
+  pivot_longer(cols = c("fl1", "fl2", "fl3"),
+               names_to = "factor",
+               values_to = "values") %>%
+  mutate(type = case_when(
+    ((values >= 0.50 | values <= -0.50) & factor == "fl1") ~ "Institucionalidad",
+    ((values >= 0.50 | values <= -0.20) & factor == "fl2") ~ "Comercio bienes",
+    ((values >= 0.50 | values <= -0.20) & factor == "fl3") ~ "Clima de inversión",
+    TRUE ~ "Impacto leve"
+  )) %>% 
+  pivot_wider(names_from = "factor", values_from = "values")
+
+
+plot_data %>%
+  plot_ly(
+    x = ~fl1, y = ~fl2, z = ~fl3,
+    color = ~type,
+    #hoverinfo = "text",
+    text = ~paste0("Variable: ", variable)
+  ) %>%
+  add_markers()
+
+plot_data %>%
+  plot_ly(
+    x = ~fl1, y = ~fl2, z = ~fl3)
+read_csv('https://raw.githubusercontent.com/plotly/datasets/master/alpha_shape.csv')
+
