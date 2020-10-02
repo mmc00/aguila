@@ -61,5 +61,8 @@ fdi_unctad <- function(path = "data/US_FdiFlowsStock_ST202007161100_v1.csv",
              if_else(economy_label == "Switzerland, Liechtenstein",
                      "Switzerland",
                      economy_label)) %>% 
-    mutate(country_code = countryname(economy_label, "iso3c"))
+    mutate(country_code = countryname(economy_label, "iso3c")) %>% 
+    # remove dup france
+    filter(economy_label != "France, metropolitan")
+  return(data)
 }
