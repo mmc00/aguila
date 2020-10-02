@@ -3,7 +3,7 @@
 ##' .. content for \details{} ..
 ##'
 tariff_wits <- function(path = "data/DataJobID-2059520_2059520_aguila2.csv",
-                      select_year = 2015) {
+                      select_year = 2016) {
 
 # wits data
 wits_tariff <- read_csv(path) %>%
