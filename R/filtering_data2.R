@@ -9,8 +9,7 @@ filtering_data2 <- function(dat,
                            drop_vars_map_sheet = "varsdrop",
                            country_var_sheet = "country_var",
                            growth_vars_sheet = "growth_vars",
-                           select_year = 2017,
-                           output) {
+                           select_year = 2017) {
   # read maps
   drop_vars <- read_xlsx(path_map, sheet = drop_vars_map_sheet)
   country_var <- read_xlsx(path_map, sheet = country_var_sheet)
@@ -66,13 +65,13 @@ filtering_data2 <- function(dat,
                 ) %>% 
     mutate(count_na = rowSums(is.na(.)))
   # export
-  wb <- createWorkbook()
-  addWorksheet(wb, "data")
-  addWorksheet(wb, "summary")
-  addWorksheet(wb, "data_wide")
-  writeData(wb, "data", data)
-  writeData(wb, "summary", data_year_sum)
-  writeData(wb, "data_wide", data_wide)
-  saveWorkbook(wb, file = output, overwrite = T)
+  # wb <- createWorkbook()
+  # addWorksheet(wb, "data")
+  # addWorksheet(wb, "summary")
+  # addWorksheet(wb, "data_wide")
+  # writeData(wb, "data", data)
+  # writeData(wb, "summary", data_year_sum)
+  # writeData(wb, "data_wide", data_wide)
+  # saveWorkbook(wb, file = output, overwrite = T)
   return(data_wide)
 }
