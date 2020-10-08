@@ -93,28 +93,33 @@ data_mfn <- data %>%
   select(-all_of("Trade tariffs, % duty*")) %>%
   select(-all_of("AHS_simple")) %>%
   select(-all_of("AHS_weighted")) %>%
-  # select(-all_of("BND_simple")) %>%
+  select(-all_of("BND_simple")) %>%
   select(-all_of("BND_weighted")) %>%
-  # select(-all_of("MFN_simple")) # %>%
-  select(-all_of("MFN_weighted")) # %>%
+  select(-all_of("MFN_simple")) # %>%
+  # select(-all_of("MFN_weighted")) # %>%
   
 data <- data_mfn
 
 # joining fdi data 
 data_fdi <- data %>% 
   left_join(fdi, by = "country_code") %>% 
-  column_to_rownames(var = "country") %>%
-  select(-country_code) %>% 
   select(-`Inflows FDI`) %>% 
   select(-economy_label) %>% 
-  select(-fdi_cp_million) %>%
+  # select(-fdi_cp_million) %>%
   select(-fdi_cp_pc) %>%
   select(-fdi_perc) %>%
-  select(-fdi_perc_gdp) #%>%
-  # select(-fdi_perc_fcf)
+  select(-fdi_perc_gdp) %>%
+  select(-fdi_perc_fcf)
+
+# filter unctad vars
+unctad <- data_fdi %>% 
+  left_join(data_unctad, by = "country_code") %>% 
+  column_to_rownames(var = "country") %>% 
+  select(-country_code)
+  
 
 # fixing ICT imports for CRI
-imputed_data <- data_fdi 
+imputed_data <- unctad
 # transformation
 # library(countrycode)
 # library(wpp2019)
@@ -179,8 +184,27 @@ cortest.bartlett(imputed_data)
 # Significativo.
 
 # Análisis de Factores
-fit <- factanal(imputed_data, 4, rotation = "none")
-fit
+imputed_data2 <- imputed_data %>% 
+  select(-all_of("terms_trade_Terms of trade index")) %>% 
+  select(-all_of("ICT goods imports (% total goods imports)")) %>% 
+  select(-all_of("Quality of electricity supply, 1-7 (best)")) %>% 
+#  select(-all_of("fdi_cp_million")) %>% 
+  select(-all_of("terms_trade_Purchasing power index of exports")) %>% 
+  select(-all_of("HH Market concentration index")) %>% 
+  select(-all_of("Trade in services (% of GDP)")) %>% 
+  select(-all_of("Comercio de mercaderías (% del PIB)")) %>% 
+  select(-all_of("Quality of roads, 1-7 (best)")) #%>% 
+  # select(-all_of("Burden of customs procedures, 1-7 (best)"))
+  
+    
+
+corr_plot2 <- corrplot(cor(imputed_data2), method = "square",
+                       type = "lower", tl.pos = "ld")
+
+#fit <- factanal(imputed_data, 4, rotation = "none")
+#fit
+fit2 <- factanal(imputed_data2, 4, rotation = "varimax")
+fit2
 fit1 <- broom::tidy(fit) %>%
   mutate_at(.vars = c("fl1", "fl2", "fl3", "fl4"), .funs = ~round(., 2))
 View(fit1)
