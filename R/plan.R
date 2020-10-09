@@ -23,16 +23,20 @@ the_plan <-
     
     # second filter
     data2fil = target(filtering_data2(data_merge,
-                           path_map = file_in("auxi/map2.xlsx"),
-                           select_year = year),
-                dynamic = map(year)),
-    
+    path_map = file_in("auxi/map2.xlsx"),
+    select_year = year
+    ),
+    dynamic = map(year, .trace = year)
+    ),
+      
     # tariff data complete
     tariff = target(tariff_wits(path = file_in(
       "data/DataJobID-2059520_2059520_aguila2.csv"
     ),
     select_year = year
-    ), dynamic = map(year)),
+    ), 
+    dynamic = map(year, .trace = year)
+    ),
     
     # fdi UNCTAD complete 
     fdi = target(fdi_unctad(path = file_in(
@@ -43,5 +47,18 @@ the_plan <-
       )
     ),
     select_year = year
-    ), dynamic = map(year))
+    ), 
+    dynamic = map(year, .trace = year)
+    ), 
+    # unctad data
+    unctad = target(data_unctad(variables_selected = c(
+                          "terms_trade_Terms of trade index",
+                          "Exports_trade_digital_deliverable_services_us_mill",
+                          "Imports_trade_digital_deliverable_services_us_mill",
+                          "terms_trade_Purchasing power index of exports"
+                        ),
+                        select_year = year
+                        ),
+                    dynamic = map(year, .trace = year)
+                    )
 )
