@@ -2,6 +2,7 @@ loadd(data2fil)
 loadd(tariff)
 loadd(fdi)
 loadd(data_merge)
+loadd(unctad)
 # packages
 library(missMDA)
 library(corrplot)
@@ -105,21 +106,21 @@ data_fdi <- data %>%
   left_join(fdi, by = "country_code") %>% 
   select(-`Inflows FDI`) %>% 
   select(-economy_label) %>% 
-  # select(-fdi_cp_million) %>%
-  select(-fdi_cp_pc) %>%
+  select(-fdi_cp_million) %>%
+  # select(-fdi_cp_pc) %>%
   select(-fdi_perc) %>%
   select(-fdi_perc_gdp) %>%
   select(-fdi_perc_fcf)
 
 # filter unctad vars
-unctad <- data_fdi %>% 
-  left_join(data_unctad, by = "country_code") %>% 
+data <- data_fdi %>% 
+  left_join(unctad, by = "country_code") %>% 
   column_to_rownames(var = "country") %>% 
   select(-country_code)
   
 
 # fixing ICT imports for CRI
-imputed_data <- unctad
+imputed_data <- data
 # transformation
 # library(countrycode)
 # library(wpp2019)
@@ -187,12 +188,14 @@ cortest.bartlett(imputed_data)
 imputed_data2 <- imputed_data %>% 
   select(-all_of("terms_trade_Terms of trade index")) %>% 
   select(-all_of("ICT goods imports (% total goods imports)")) %>% 
-  select(-all_of("Quality of electricity supply, 1-7 (best)")) %>% 
+  select(-all_of("No. Of imported HS6 digit Products")) %>% 
+  # select(-all_of("Quality of electricity supply, 1-7 (best)")) %>% 
 #  select(-all_of("fdi_cp_million")) %>% 
   select(-all_of("terms_trade_Purchasing power index of exports")) %>% 
-  select(-all_of("HH Market concentration index")) %>% 
-  select(-all_of("Trade in services (% of GDP)")) %>% 
-  select(-all_of("Comercio de mercaderías (% del PIB)")) %>% 
+  select(-all_of("HH Market concentration index")) %>%
+  select(-all_of("Trade in services (% of GDP)")) %>%
+  select(-all_of("Imports_trade_digital_deliverable_services_us_mill")) %>% 
+  select(-all_of("Comercio de mercaderías (% del PIB)")) %>%
   select(-all_of("Quality of roads, 1-7 (best)")) #%>% 
   # select(-all_of("Burden of customs procedures, 1-7 (best)"))
   
@@ -204,7 +207,16 @@ corr_plot2 <- corrplot(cor(imputed_data2), method = "square",
 #fit <- factanal(imputed_data, 4, rotation = "none")
 #fit
 fit2 <- factanal(imputed_data2, 4, rotation = "varimax")
-fit2
+
+
+# library(psych)
+fit2 <- fa(imputed_data2, 4, fm = "ml", rotate = "varimax")
+fit2$loadings
+fa.diagram(fit2, sort = T, main = "Análisis Factorial")
+
+
+
+
 fit1 <- broom::tidy(fit) %>%
   mutate_at(.vars = c("fl1", "fl2", "fl3", "fl4"), .funs = ~round(., 2))
 View(fit1)
