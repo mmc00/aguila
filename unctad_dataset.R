@@ -62,7 +62,7 @@ tot <- read_csv("data/US_TermsOfTrade_ST202007011402_v1.csv",
          -index2000, -index2010, -country_code) %>% 
   mutate(var = "terms_trade") %>% 
   mutate(variable = paste0(var, "_", trade_index_label)) %>% 
-  select(-var, -trade_index_label)
+  select(-var, -trade_index_label) 
   # pivot_wider(names_from = "trade_index_label",
   #             values_from = "index2015")
 
@@ -117,7 +117,8 @@ digital <- read_csv("data/US_TradeServDigital_ST202007241022_v1.csv",
                            var, "_",
                            vars
                       )) %>% 
-  select(-flow_label, -var, -vars, -country_code)
+  select(-flow_label, -var, -vars, -country_code) %>% 
+  filter(economy_label != "LDCs: Africa and Haiti")
 
 # Goods And Serv Trade Openness
 tradeopenness <-
@@ -178,9 +179,6 @@ concent <- read_csv("data/US_ConcentDiversIndices_ST202009111058_v1.csv",
                values_to = "values") %>% 
   mutate(variable = paste0(flow_label, "_", var)) %>% 
   select(-var, -flow_label)
-  
-  
-  
 
 # tariff data 
 tf <- read_csv("data/US_Tariff_ST201910091711_v2.csv",
@@ -235,6 +233,8 @@ data_un <- bind_rows(rca, tot, digital, concent) %>%
     economy_label == "Yemen, Democratic" ~ "Yemen",
     TRUE ~ economy_label
   )) %>% 
+  filter(economy_label != "LDCs: Africa and Haiti") %>% 
+  filter(economy_label != "LDCs: Islands and Haiti") %>% 
   mutate(country_code = countryname(economy_label, "iso3c")) %>% 
   filter(!is.na(country_code))
   # group_by(economy_label) %>% 
@@ -242,13 +242,16 @@ data_un <- bind_rows(rca, tot, digital, concent) %>%
   # print(n = 200)
   # select(-economy_label)
 
+# year_1
+year_1 = 2015
+
 data_un %>% 
   group_by(variable) %>% 
   tally() %>% 
   print(n = 200)
 # filtro
 data_unctad <- data_un %>% 
-  filter(year == 2016) %>% 
+  filter(year == year_1) %>% 
   pivot_wider(names_from = "variable",
               values_from = "values") %>% 
   select(year, country_code, "terms_trade_Terms of trade index",
@@ -261,3 +264,4 @@ data_unctad <- data_un %>%
          # "Imports_concentration_index"
          ) %>% 
   select(-year)
+
