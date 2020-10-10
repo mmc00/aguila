@@ -206,14 +206,59 @@ corr_plot2 <- corrplot(cor(imputed_data2), method = "square",
 
 #fit <- factanal(imputed_data, 4, rotation = "none")
 #fit
-fit2 <- factanal(imputed_data2, 4, rotation = "varimax")
+fit2 <- factanal(imputed_data2, 4, rotation = "varimax",
+                 cutoff = 0.3)
+# fit2 <- factanal(imputed_data2, 4, rotation = "varimax")
+
+data_plot <- fit2 %>% 
+  broom::tidy() %>% 
+  select(variable) %>% 
+  unname() %>% 
+  unlist()
+  # filter_at(.vars = c("fl1", "fl2",
+  #                     "fl3", "fl4"), any_vars(. >= 0.3 | . <= -0.3))
+data_plot
+library(semPlot)
+semPaths(fit2, 
+         what = "std", 
+         layout = "tree",
+         style = "lisrel",
+         reorder = T,
+         residuals=FALSE,
+         manifests = data_plot,
+         latents = c("Factor1", "Factor2", "Factor3", "Factor4"),
+         cut = 0.3,
+         rotation = 2,
+         sizeMan = 20,
+         shapeMan = "rectangle",
+         sizeMan2 = 10,
+         sizeLat = 5)
+         # pastel = TRUE, 
+         # what = "par",
+         # mar = c(2, 2, 2, 2),
+         # intercepts = TRUE,
+         # edge.label.cex = 1,
+         # sizeMan = 7,
+
+         # style="lisrel",         
+         # layout="tree",
+         # exoCov = FALSE,
+         # optimizeLatRes = TRUE,
+         # sizeLat = 10) 
 
 
 # library(psych)
-fit2 <- fa(imputed_data2, 4, fm = "ml", rotate = "varimax")
-fit2$loadings
-fa.diagram(fit2, sort = T, main = "Análisis Factorial")
-
+fit3 <- fa(imputed_data2, 4, fm = "ml", rotate = "varimax")
+fit3$loadings
+fa.diagram(fit3, sort = T, main = "Análisis Factorial",
+                      digits = 3, 
+           rsize = .6,
+           esize = 3,
+           size = 5,
+           cex = .6,
+           l.cex = .2,
+           cut = .4)
+           # marg=c(.2,.2,.2,.2))
 
 
 
