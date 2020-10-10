@@ -10,3 +10,7 @@
 #     "CXX14 = $(BINPREF)g++ -m$(WIN) -std=c++1y",
 #     "CXX11FLAGS=-O3 -Wno-unused-variable -Wno-unused-function",
 #     file = M, sep = "\n", append = TRUE)
+
+# Check issue
+# https://github.com/OpenMx/OpenMx/issues/267
+# tools::makevars_user()
