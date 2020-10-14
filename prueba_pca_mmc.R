@@ -211,19 +211,25 @@ fit2 <- factanal(imputed_data2, 4, rotation = "varimax",
 # fit2 <- factanal(imputed_data2, 4, rotation = "varimax")
 
 data_plot <- fit2 %>% 
-  broom::tidy() %>% 
-  select(variable) %>% 
-  unname() %>% 
-  unlist()
+  broom::tidy()
+  # %>% 
+  #   select(variable) %>% 
+  #   unname() %>% 
+  #   unlist()
   # filter_at(.vars = c("fl1", "fl2",
   #                     "fl3", "fl4"), any_vars(. >= 0.3 | . <= -0.3))
+
+fit2$loadings <- loadings(fit2, digits = 3, cutoff = 0.3, sort = FALSE)
+fa.diagram(fit2, main = "Análisis Factorial")
+
 data_plot
 library(semPlot)
 semPaths(fit2, 
          what = "std", 
-         layout = "tree",
+         layout = "tree2",
          style = "lisrel",
          reorder = T,
+         intercepts = T,
          residuals=FALSE,
          manifests = data_plot,
          latents = c("Factor1", "Factor2", "Factor3", "Factor4"),
@@ -249,15 +255,14 @@ semPaths(fit2,
 
 # library(psych)
 fit3 <- fa(imputed_data2, 4, fm = "ml", rotate = "varimax")
-fit3$loadings
-fa.diagram(fit3, sort = T, main = "Análisis Factorial",
-                      digits = 3, 
-           rsize = .6,
-           esize = 3,
-           size = 5,
-           cex = .6,
-           l.cex = .2,
-           cut = .4)
+fa.diagram(fit3, sort = T, main = "Análisis Factorial")
+           # digits = 3, 
+           # rsize = .6,
+           # esize = 3,
+           # size = 5,
+           # cex = .6,
+           # l.cex = .2,
+           # cut = .4)
            # marg=c(.2,.2,.2,.2))
 
 
